@@ -1,0 +1,34 @@
+PROJECT BRIEF: You are building "Just One Thing," an Android app to curb mindless scrolling.
+
+CRITICAL ARCHITECTURE:
+
+Background Service: Implement a ForegroundService with a persistent notification (Required to keep the app alive on Android 10+).
+
+Polling vs Service: Use UsageStatsManager to check the top activity every 1000ms. If the package name matches the 'Blocked List', launch the Overlay Activity.
+
+The Overlay: Use WindowManager to draw over other apps. The overlay must NOT be dismissible by the 'Back' button; only by the two UI buttons provided.
+
+PHASED INSTRUCTIONS:
+
+Phase 1: Setup the Room database for BlockedApp and UsageEvent entities.
+
+Phase 2: Build the "App Selection" screen (list all installed apps with icons).
+
+Phase 3: Implement the Background Service and the 5-second lockout logic.
+
+Phase 4: Create the Dashboard with "Impulse Control Rate" stats (Success vs. Failures).
+
+GUARDRAILS: > - Do not include any Firebase or external analytics.
+
+Keep the APK size under 10MB.
+
+Handle "Permission Denied" states gracefully with a custom "How to Enable" tutorial screen.
+
+🧠 Additional Advice for your MVP Process
+To make this build even smoother, here are three things you should do before the agent starts coding:
+
+Define the "Alternative App": Ask the agent to include a "Settings" option where the user can pick one app they want to use more (e.g., Duolingo). This makes the "Alternative Path" feature (F4) actually work.
+
+The "Safety Label" Text: If you plan to put this on the Play Store, tell the agent to generate a privacy_policy.html file stored locally in the assets folder. Google requires this for apps using "Usage Access."
+
+Handle Reboot: Remind the agent to implement a BroadcastReceiver for BOOT_COMPLETED. Otherwise, the distraction blocker won't start automatically when the user restarts their phone!

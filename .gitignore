@@ -1,0 +1,37 @@
+# Common ignores
+node_modules/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+
+# Android
+android/.gradle/
+android/app/build/
+android/local.properties
+captures/
+*.apk
+*.aar
+*.jks
+*.keystore
+
+# iOS
+ios/build/
+ios/DerivedData/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/
+ios/Runner/GeneratedPluginRegistrant.h
+ios/Runner/GeneratedPluginRegistrant.m
+ios/Config/**/*.xcconfig
+ios/**/config.json
+ios/ThirdParty/
+ios/Project.xcodeproj/project.xcworkspace/
+ios/Project.xcodeproj/xcuserdata/
+
+# Build artifacts
+dist/
+out/
+bin/
+build/
