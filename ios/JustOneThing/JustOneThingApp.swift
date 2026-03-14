@@ -1,9 +1,37 @@
 import SwiftUI
+import SwiftData
 import FamilyControls
 
 @main
 struct JustOneThingApp: App {
     @StateObject var authManager = AuthorizationManager.shared
+    @Environment(\.modelContext) private var modelContext
+    
+    var sharedModelContainer: ModelContainer = {
+        let schema = Schema([
+            BlockedApp.self,
+            UsageEvent.self,
+            UserStats.self,
+            Achievement.self,
+            FocusMode.self,
+            DailyChallenge.self,
+            PomodoroSession.self,
+            TimerSettings.self,
+            DailyGoal.self,
+            WeeklyGoal.self
+        ])
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        
+        do {
+            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
+    }()
+    
+    init() {
+        initializeData()
+    }
     
     var body: some Scene {
         WindowGroup {
@@ -15,10 +43,22 @@ struct JustOneThingApp: App {
                     .environmentObject(authManager)
             }
         }
+        .modelContainer(sharedModelContainer)
+    }
+    
+    private func initializeData() {
+        Task { @MainActor in
+            let context = sharedModelContainer.mainContext
+            
+            SharedDataStore.shared.initializeUserStats(context: context)
+            SharedDataStore.shared.initializeDefaultFocusModes(context: context)
+            SharedDataStore.shared.initializeAchievements(context: context)
+            SharedDataStore.shared.initializeTimerSettings(context: context)
+            SharedDataStore.shared.initializeDailyGoal(context: context)
+        }
     }
 }
 
-/// Manages the FamilyControls authorization state.
 class AuthorizationManager: ObservableObject {
     static let shared = AuthorizationManager()
     
@@ -27,8 +67,7 @@ class AuthorizationManager: ObservableObject {
     private let center = AuthorizationCenter.shared
     
     init() {
-        // In a real app, we'd check current status
-        updateStatus()
+        checkAuthorizationStatus()
     }
     
     func requestAuthorization() {
@@ -37,15 +76,26 @@ class AuthorizationManager: ObservableObject {
                 try await center.requestAuthorization(for: .individual)
                 DispatchQueue.main.async {
                     self.isAuthorized = true
+                    AppStyling.hapticSuccess()
                 }
             } catch {
                 print("Failed to authorize: \(error.localizedDescription)")
+                AppStyling.hapticWarning()
             }
         }
     }
     
-    private func updateStatus() {
-        // Simple check for MVP
-        // In production, use center.authorizationStatus
+    private func checkAuthorizationStatus() {
+        Task {
+            let status = center.authorizationStatus
+            DispatchQueue.main.async {
+                switch status {
+                case .approved:
+                    self.isAuthorized = true
+                default:
+                    self.isAuthorized = false
+                }
+            }
+        }
     }
 }

@@ -1,0 +1,24 @@
+workflows:
+  ios-workflow:
+    name: iOS Build
+    max_build_duration: 60
+    environment:
+      ios: "17.0"
+      xcode: "15.0"
+      cocoapods: default
+    scripts:
+      - name: Set code signing identity
+        script: |
+          # For simulator builds, we don't need code signing
+          echo "SKIP_CODE_SIGNING=1" >> $CM_ENV
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios
+          pod install
+      - name: Build iOS project
+        script: |
+          cd ios
+          xcodebuild build -workspace JustOneThing.xcworkspace -scheme JustOneThing -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 15 Pro'
+    artifacts:
+      - build/Build/Products/Debug-iphonesimulator/JustOneThing.app
+      - ios/*.ipa

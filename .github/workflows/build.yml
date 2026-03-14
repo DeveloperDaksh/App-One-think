@@ -1,0 +1,39 @@
+name: Build iOS App
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
+      
+      - name: Show Xcode version
+        run: xcodebuild -version
+      
+      - name: Build iOS App
+        run: |
+          cd ios
+          xcodebuild -project JustOneThing.xcodeproj -scheme JustOneThing -configuration Debug -destination 'generic/platform=iOS Simulator' build
+      
+      - name: Create ZIP
+        run: |
+          cd ios/build/Build/Products/Debug-iphonesimulator
+          zip -r JustOneThing.zip JustOneThing.app
+      
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: JustOneThing
+          path: ios/build/Build/Products/Debug-iphonesimulator/JustOneThing.zip
+          retention-days: 7
